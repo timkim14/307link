@@ -4,23 +4,40 @@ import Form from './Form'
 import axios from 'axios';
 
 class App extends Component {
-    state = {
-        characters : []
-    };
-    removeCharacter = index => {
+    constructor(props){
+        super(props);
+        this.state = {
+            characters : []
+        };
+    }
+
+    removeCharacter = id => {
+        const self = this
         const { characters} = this.state
-        this.setState({
-            characters: characters.filter((character, i) =>{
-                return i !== index
+        
+        return axios.delete(`http://localhost:5000/users/${id}`)
+            .then(function(response){
+                self.setState({
+                    characters: characters.filter((character) =>{
+                        return id !== character.id
+                    })
+                })
+                console.log(response);
+                return(response)
             })
-        })
+            .catch(function(error){
+                console.log(error);
+                return false;
+            });
+
+        
     }
 
     makePostCall(character){
         return axios.post('http://localhost:5000/users', character)
             .then(function(response){
                 console.log(response);
-                return (response.status === 200)
+                return (response)
             })
             .catch(function(error){
                 console.log(error);
@@ -30,15 +47,16 @@ class App extends Component {
 
     handleSubmit = character =>{
         this.makePostCall(character).then( callResult =>{
-            if(callResult === true) {
-                this.setState({ characters: [...this.state.characters, character] });
-             }
+            console.log(callResult)
+            if(callResult.data.success) {
+                this.setState({ characters: [...this.state.characters, callResult.data.newcharacter] });
+                }
             }
         )
     }
 
     componentDidMount() {
-        axios.get('http://localhost:3000/users')
+        axios.get('http://localhost:5000/users')
          .then(res => {
            const characters = res.data.users_list;
            this.setState({ characters });

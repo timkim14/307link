@@ -2,6 +2,7 @@ from flask import Flask
 from flask import request
 from flask import jsonify
 from flask_cors import CORS
+import random
 import json
 app = Flask(__name__)
 CORS(app)
@@ -39,17 +40,25 @@ users = {
 
 @app.route('/')
 def hello_world():
-	return 'Hello, world!'
+	return flask.Response(status=201)
 
 
-@app.route('/users/<id>')
+@app.route('/users/<id>', methods = ['GET', 'DELETE'])
 def get_user(id):
-	if id:
+	if request.method == 'GET':
 		for user in users['users_list']:
 			if user['id'] == id:
 				return user
 		return ({})
-	return users
+	elif request.method == 'DELETE':
+		for user in range(len(users['users_list'])):
+			if users['users_list'][user]['id'] == id:
+				del users['users_list'][user]
+				resp = jsonify(success=True)
+				return resp
+		return 'cannot find user'
+	else:
+		return 
 
 @app.route('/users', methods = ['GET', 'POST', 'DELETE'])
 def get_users():
@@ -72,8 +81,10 @@ def get_users():
 		return users
 	elif request.method == 'POST':
 		userToAdd = request.get_json()
+		userToAdd['id'] =  str(random.randint(1,1000))
 		users['users_list'].append(userToAdd)
-		resp = jsonify(success=True)
+		resp = jsonify(newcharacter = userToAdd, success=True)
+		resp.status_code = 201
 		return resp
 	elif request.method == 'DELETE':
 		search_username = request.args.get('name')
@@ -81,6 +92,8 @@ def get_users():
 			for user in range(len(users['users_list'])):
 				if users['users_list'][user]['name'] == search_username:
 					del users['users_list'][user]
-					return search_username + "\n"
+					resp = jsonify(success=True)
+					resp.status_code = 201
+					return resp
 		return 'cannot find user'
 	
