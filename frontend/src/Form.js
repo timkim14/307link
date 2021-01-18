@@ -3,19 +3,24 @@ import React, { Component } from 'react';
 
 
 class Form extends Component {
-  initialState = {
-    name: '',
-    job: '',
-  };
-  handleChange = event =>{
-    const { name, value } = event.target
-    this.setState({
-        [name]: value,
-    })
-}
+    initialState = {
+        name: '',
+        job: '',
+    };
+    handleChange = event =>{
+        const { name, value } = event.target
+        this.setState({
+            [name]: value,
+        })
+    }
 
-  state = this.initialState;
-  render(){
+    submitForm = () =>{
+        this.props.handleSubmit(this.state)
+        this.setState(this.initialState)
+    }
+
+    state = this.initialState;
+    render(){
       const { name, job} = this.state;
 
       return(
@@ -34,6 +39,7 @@ class Form extends Component {
                 id="job"
                 value={job}
                 onChange={this.handleChange} />
+            <input type = "button" value = "Submit" onClick = {this.submitForm} />
       </form>
       )
   }
